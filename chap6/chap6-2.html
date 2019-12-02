@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset="UTF-8">
+    <title>HTML 출력해보기-장바구니</title>
+    <script src='./chap6.js'></script>
+  </head>
+  <body>
+    <div id='cart'></div>
+
+    <script>
+      const products = [    
+        {name: '반팔티', price: 15000, quantity: 1, is_selected: true}, //장바구니의 선택,미선택 부분
+        {name: '긴팔티', price: 20000, quantity: 2, is_selected: false},
+        {name: '핸드폰케이스', price: 15000, quantity: 3, is_selected: true},
+        {name: '후드티', price: 30000, quantity: 4, is_selected: false},
+        {name: '바지', price: 25000, quantity: 5, is_selected: false}
+      ];
+      //이 장은 함수들을 만드는 과정이 중요하다 (chap6-1.js 에서 명시)
+      const add = (a,b) => a + b;
+
+      //합을 구하는 sum()함수 만들기
+      const sum = curry((f,iter) => go(
+        iter,
+        map(f),
+        reduce(add)
+      ));
+        //sum()의 줄여주는 reduce() 특성을 이용하여 코드를 더 줄인 것이다
+        //기존코드는 go(product, map(p => 이터러블 tr, reduce(add))) 이다
+        //아래에서 go(product, sum(p => 이터러블 tr)) 을 한 것이다
+      //총 수량합 함수만들기
+      const total_quantity = sum(p => p.quantity);
+      //총 금액합 함수만들기
+      const total_price = sum(p => p.price * p.quantity);
+      //틀만들기
+  document.querySelector('#cart').innerHTML = `    <table>
+      <tr>
+        <th></th>
+        <th>상품 이름</th>
+        <th>가격</th>
+        <th>수량</th>
+        <th>총 가격</th>
+      </tr>
+      ${go(products, sum(p => `
+          <tr>
+            <td><input type="checkbox" ${p.is_selected ? 'checked' : ''}></td>
+            <td>${p.name}</td>
+            <td>${p.price}</td>
+            <td><input type="number" value="${p.quantity}"></td>
+            <td>${p.price * p.quantity}</td>
+          </tr>
+      `))}
+      <tr>
+        <td colspan="3">합계</td>
+        <td>${total_quantity(filter(p => p.is_selected, products))}</td>
+        <td>${total_price(filter(p => p.is_selected, products))}</td>
+      </tr>
+    </table>`;
+    </script>
+
+  </body>
+</html>
